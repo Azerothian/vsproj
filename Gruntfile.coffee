@@ -60,3 +60,4 @@ module.exports = (grunt) ->
     'copy',
     'notify:complete'
   ]
+# grunt build && node-debug node_modules\mocha\bin\_mocha build\tests\element-test.js
