@@ -7,39 +7,77 @@ Element = require "./element"
 
 newline = "\r\n"
 
-
 class Solution
   open: (@file) =>
     return new Promise (resolve, reject) =>
-      @list = []
-
-      @elements = []
-      @current = ""
-      @groupLevel = 0
-
+      @list = [new Element]
       fs.readFile @file, "utf8", (err, @fileData) =>
         if err?
           throw err
-
         lines = @fileData.split newline
         promises = new Chains
         for line in lines
           l = line.replace(/\t/g, '').trim()
           if l != "" and l.indexOf("#") != 0 and l.indexOf("Microsoft Visual Studio Solution File") != 0
             promises.push @render, @, [l]
-        console.log "fireing chains"
         return promises.run().then () =>
-
-          console.log "fin"
-          #console.log "elements", util.inspect(@elements)
-          resolve()
+          resolve(@list[0])
         , reject
-
-  propertiesProcessor: () =>
+  render: (line) =>
     return new Promise (resolve, reject) =>
+      @parseLine(line)
+        .then @processElement
+        .then resolve, reject
+        .catch (e) ->
+          throw e
 
-      #@VisualSudioVersion = @fileData.match(/^VisualStudioVersion = (.*)\s/gm)[0]
 
+  processElement: (e) =>
+    return new Promise (resolve, reject) =>
+      if e.isGroupClose and @list.length > 1
+        l = @list.pop()
+        @list[@list.length - 1].push l
+      else if e.isGroup
+        @list.push e
+      else if !e.isGroupClose and !e.isGroup
+        @list[@list.length - 1].push e
+      return resolve()
+
+
+
+  parseLine: (line) =>
+    return new Promise (resolve, reject) =>
+      e = new Element()
+      name = line
+      if name.indexOf(" = ") > -1
+        d = name.split(" = ")
+        name = d[0]
+        props = d[1].split(", ")
+        if props.length == 1
+          e.properties = @cleanString(props[0])
+        else
+          e.properties = []
+          for p in props
+            e.properties.push @cleanString(p)
+        e.hasProperties = true
+
+      if name.indexOf("(") > -1 and name.indexOf(")") > -1
+        c = name.split("(")
+        name = c[0]
+        args = c[1].split(")")[0] #assuming only one arg is allowed
+        if args?
+          e.args = @cleanString(args)
+        e.hasArgs = true
+      if @fileData.indexOf("End#{name}") > -1
+        e.isGroup = true
+      else if name.indexOf("End") == 0
+        e.isGroupClose = true
+        e.tag = name.replace "End", ""
+      e.name = @cleanString(name)
+      return resolve(e)
+
+  cleanString: (str) ->
+    return str.replace(/"/g, '').trim()
 
 module.exports = Solution
 
