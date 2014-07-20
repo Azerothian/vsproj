@@ -1,13 +1,28 @@
 util = require "util"
-
+debug = require("debug")("vsproj:element")
+Promise = require "bluebird-chains"
 class Element
-  constructor: () ->
+  constructor: (data) ->
     @elements = []
 
-  getElement: (name) ->
+    if data?
+      for o of data
+        @[o] = data[o]
+
+  getElement: (name) =>
     for e in @elements
       if e.name is name
         return e
+
+  getElementsByName: (name) =>
+    return new Promise (resolve, reject) =>
+      debug "getElementsByName #{name}"
+      r = []
+      for e in @elements
+        if e.name is name
+          r.push e
+      debug "getElementsByName #{name} total: #{r.length}"
+      resolve(r)
 
 
   push: () =>
@@ -17,24 +32,3 @@ class Element
 
 
 module.exports = Element
-
-###
-createByPath: (path, value, checkIfExists = false) =>
-  s = path.replace(/\[(\w+)\]/g, ".$1") # convert indexes to properties
-  s = s.replace(/^\./, "") # strip a leading dot
-  a = s.split(".")
-  o = @
-  while a.length
-    n = a.shift()
-    if !(n of o)
-      o[n] = new Element
-    if a.length > 0
-      o = o[n]
-    else
-      o.setValue(n, value, checkIfExists)
-
-setValue: (name, value, checkIfExists = false) =>
-  if checkIfExists and @[name]?
-    return
-  @[name] = value
-###
