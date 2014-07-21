@@ -1,5 +1,6 @@
 fs = require "fs"
-Promise = require "bluebird-chains"
+Promise = require "bluebird"
+Chains = require "chains"
 util = require "util"
 debug = require("debug")("vsproj:slnfile")
 Element = require "./element"
@@ -14,13 +15,13 @@ class SlnFile extends Element
         if err?
           throw err
         lines = @fileData.split newline
-        a = []
+        a = new Chains
         for line in lines
           l = line.replace(/\t/g, '').trim()
           if l != "" and l.indexOf("#") != 0 and l.indexOf("Microsoft Visual Studio Solution File") != 0
-            a.push @render(l)
+            a.push @render, [l]
         debug "parseing lines"
-        return Promise.chains.concat(a).then () =>
+        return a.last().then () =>
           resolve(@list[0])
         , reject
 

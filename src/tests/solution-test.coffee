@@ -14,6 +14,6 @@ describe 'Solution', () ->
   it 'Save Simple', () ->
     sol = new solution()
     sol.open("./demo/WebApplication1.sln").then () ->
-      debug "open completed"
+      debug "open completed", sol
       sol.save("./demo/solution-test.sln").then () ->
         expect(true).to.equal(true)
