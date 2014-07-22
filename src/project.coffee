@@ -89,7 +89,13 @@ class Project
   open: (@file) =>
     return new Promise (resolve, reject) =>
       fs.readFile @file, (err, data) =>
+        if err?
+          debug err, @file
+          return reject(err)
         parser.parseString data, (err, @xml) =>
+          if err?
+            debug err, @file
+            return reject(err)
           map(@xml, projectMap, undefined, @).then () =>
             debug "Project", @
             resolve(@)

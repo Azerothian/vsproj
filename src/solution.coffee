@@ -8,7 +8,9 @@ debug = require("debug")("vsproj:solution")
 Element = require "./element"
 slnfile = require "./slnfile"
 map = require "coffeemapper"
+path = require "path"
 
+Project = require "./project"
 
 elementProcessor = {
   newItem: () ->
@@ -19,17 +21,28 @@ elementProcessor = {
     return item[key]
 }
 
-projectMap = {
+quoteString = (str) ->
+  return "\"#{str}\""
+
+cleanString = (str) ->
+  return str.replace(/"/g, '').trim()
+
+cleanPath = (str) ->
+  if path.sep is '/'
+    return str.replace /\\/g, '/'
+  return str
+
+projectDataMap = {
   read:
     "name": (src, resolve, reject) ->
-      debug "projectMap.read.name"
+      debug "projectDataMap.read.name"
       #console.log "src:", src
       resolve src.properties[0]
     "path": (src, resolve, reject) ->
-      debug "projectMap.read.path"
-      resolve src.properties[1]
+      debug "projectDataMap.read.path", src.properties[1]
+      resolve cleanString(src.properties[1])
     "id": (src, resolve, reject) ->
-      debug "projectMap.read.id"
+      debug "projectDataMap.read.id"
       resolve src.properties[2]
     "templateid": (src, resolve, reject) ->
       resolve src.args
@@ -39,8 +52,8 @@ projectMap = {
     "name": (src, resolve, reject) ->
       resolve "Project"
     "properties": (src, resolve, reject) ->
-      debug "projectMap.write.properties", src
-      resolve [src.name, src.path, src.id]
+      debug "projectDataMap.write.properties", src
+      resolve [src.name, quoteString(src.path), src.id]
     "hasProperties": (src, resolve, reject) ->
       resolve true
     "hasArgs":  (src, resolve, reject) ->
@@ -55,6 +68,28 @@ projectMap = {
 }
 
 debug "set element map"
+
+projectsMap = {
+  read:
+    "Projects": (src, resolve, reject) ->
+      debug "projectsMap.read.Projects", src
+      output = []
+      promises = []
+      for p in src.ProjectData
+        debug "project", p
+        promises.push new Promise (resolve, reject) ->
+          newProj = new Project()
+          filePath = path.resolve(src.file, "../#{cleanPath(p.path)}")
+          debug "loading project", filePath
+          newProj.open(filePath).then () ->
+            resolve(newProj)
+          , () ->
+            debug "unable to load project", p, src
+            reject("unable to load project")
+      Promise.all(promises).then resolve, reject
+}
+
+
 elementMap = {
   read:
     "VisualStudioVersion": (src, resolve, reject) ->
@@ -65,11 +100,11 @@ elementMap = {
       debug "elementMap.read.MinimumVisualStudioVersion"
       value = src.getElement("MinimumVisualStudioVersion").properties[0]
       return resolve value
-    "Projects": (src, resolve, reject) ->
+    "ProjectData": (src, resolve, reject) ->
       debug "elementMap.read.Projects"
       src.getElementsByName("Project").then (projects) ->
         debug "elementMap.read.Projects.getElementsByName.finish"
-        map(projects, projectMap.read).then (data) ->
+        map(projects, projectDataMap.read).then (data) ->
           debug "elementMap.read.Projects.map.finish"
           resolve(data)
         , reject
@@ -94,7 +129,8 @@ elementMap = {
         properties: [src.MinimumVisualStudioVersion]
         hasProperties: true
       }
-      map(src.Projects, projectMap.write, elementProcessor).then (result) ->
+      #todo: generate ProjectDate from Projects
+      map(src.ProjectData, projectDataMap.write, elementProcessor).then (result) ->
         debug "elementMap.write.elements.map.Projects"
         for r in result
           data.push r
@@ -113,7 +149,10 @@ class Solution
       debug "slnfile start", @slnfile
       @slnfile.open(@file).then () =>
         debug "slnfile opened - starting map"
-        map(@slnfile, elementMap.read, null, @).then resolve, reject
+        map(@slnfile, elementMap.read, null, @).then () =>
+          map(@, projectsMap.read, null, @).then () =>
+            resolve(@)
+          , reject
       , reject
 
   save: (path = @file) =>
