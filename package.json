@@ -30,6 +30,7 @@
     "bluebird": "^2.2.2",
     "chains": "0.0.3",
     "coffeemapper": "0.0.1",
-    "debug": "^1.0.4"
+    "debug": "^1.0.4",
+    "xml2js": "^0.4.4"
   }
 }

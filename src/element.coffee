@@ -1,6 +1,6 @@
 util = require "util"
 debug = require("debug")("vsproj:element")
-Promise = require "bluebird-chains"
+Promise = require "bluebird"
 class Element
   constructor: (data) ->
     @elements = []
