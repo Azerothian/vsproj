@@ -1,6 +1,6 @@
 fs = require "fs"
 Promise = require "bluebird"
-Chains = require "chains"
+Chains = require "bluebird-chains"
 util = require "util"
 debug = require("debug")("vsproj:slnfile")
 Element = require "./element"
