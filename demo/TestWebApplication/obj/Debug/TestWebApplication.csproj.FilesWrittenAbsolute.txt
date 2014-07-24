@@ -1,0 +1,5 @@
+/Users/mmckenzie/Github/vsproj/demo/TestWebApplication/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/mmckenzie/Github/vsproj/demo/TestWebApplication/bin/TestWebApplication.dll.mdb
+/Users/mmckenzie/Github/vsproj/demo/TestWebApplication/bin/TestWebApplication.dll
+/Users/mmckenzie/Github/vsproj/demo/TestWebApplication/obj/Debug/TestWebApplication.dll
+/Users/mmckenzie/Github/vsproj/demo/TestWebApplication/obj/Debug/TestWebApplication.dll.mdb

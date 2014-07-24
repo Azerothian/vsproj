@@ -6,7 +6,7 @@ debug = require("debug")("vsproj:tests:slnfile-test")
 describe 'SlnFile', () ->
   it 'Open Simple', () ->
     sol = new slnFile()
-    sol.open("./demo/WebApplication1.sln").then () ->
+    sol.open("./demo/solution.sln").then () ->
       VisualStudioVersion = sol.getElement("VisualStudioVersion").properties[0]
       expect(VisualStudioVersion).to.equal("12.0.30501.0")
 
