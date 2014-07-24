@@ -31,7 +31,7 @@ elementMap = {
 
 
 projectMap = {
-  "References": (src, resolve, reject) ->
+  "References": (src, res, rej) ->
     debug "projectMap.References",
     refMap = {
       name: (src, resolve, reject) ->
@@ -56,7 +56,7 @@ projectMap = {
         refs = refs.concat e.Reference
 
     debug "projectMap.References.startmap"
-    map(refs, refMap).then resolve, reject
+    map(refs, refMap).then res, rej
   "Content": (src, resolve, reject) ->
     debug "projectMap.Content"
     refs = []
@@ -90,11 +90,11 @@ class Project
     return new Promise (resolve, reject) =>
       fs.readFile @file, (err, data) =>
         if err?
-          debug err, @file
+          debug "read file err", err, @file
           return reject(err)
         parser.parseString data, (err, @xml) =>
           if err?
-            debug err, @file
+            debug "xml err", err, @file
             return reject(err)
           map(@xml, projectMap, undefined, @).then () =>
             debug "Project", @
