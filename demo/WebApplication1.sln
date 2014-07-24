@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
-MinimumVisualStudioVersion = 10.0.40219.1
+#MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{DAA7C8D8-63E8-4587-842D-B39F01718BF8}"
   ProjectSection(ProjectDependencies) = postProject
     {B68291DE-FCED-46E0-85EE-F273AA73448F} = {B68291DE-FCED-46E0-85EE-F273AA73448F}
